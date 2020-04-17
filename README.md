@@ -1,2 +1,2 @@
 # shipyardProject
-The Flask website
+Web Development with Flask
