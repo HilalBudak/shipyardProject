@@ -1,0 +1,36 @@
+{% extends "layout.html" %}
+
+{% block body %}
+{% from "includes/formhelpers.html" import render_field %}
+<br></br>
+<br></br>
+
+<label style="font-size: xx-large;">Profil</label>
+<button type="button" id="updatepassword" style="float:right;" class="btn btn-outline-warning">Şifre Değiştir</button>
+
+<script type="text/javascript">
+    document.getElementById("updatepassword").onclick = function () {
+        location.href = "/UpdatePassword";
+    };
+</script>
+
+<hr>
+
+{% if profil_data %}
+
+<ul class="list-group">
+        {% for data in profil_data %}
+        <li class="list-group-item">İsim: {{data.Adi}}</li>
+        <li class="list-group-item">Soyisim: {{data.Soyadi}}</li>
+        <li class="list-group-item">Email: {{data.Email}}</li>
+        <li class="list-group-item">TCKN: {{data.TCKN}}</li>
+        <li class="list-group-item">Gorevi: {{data.Gorevi}}</li>
+        <li class="list-group-item">KanGrubu: {{data.KanGrubu}}</li>
+        {% endfor %}
+</ul>
+
+{% else %}
+<div class="alert alert-danger">Profil yüklenemedi..Tekrar deneyin</div>
+{% endif %}
+
+{% endblock %}
