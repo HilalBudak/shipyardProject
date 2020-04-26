@@ -21,6 +21,11 @@ class LoginForm(Form):
     email = StringField("Email")
     sifre = PasswordField("Şifre")
 
+class UpdatePasswordForm(Form):
+    yenisifre = PasswordField("Yeni Şifreniz:")
+    tekrarsifre = PasswordField("Yeni Şifre Tekrar:")
+    eskisifre = PasswordField("Mevcut Şifre:")
+
 app = Flask(__name__)
 app.secret_key = "himu"
 app.config["MYSQL_HOST"]="127.0.0.1"
@@ -87,6 +92,47 @@ def login():
 def logout():
     session.clear()
     return redirect(url_for("index"))
+
+@app.route("/profil")
+def profil():
+    cursor = myslq.connection.cursor()
+    sorgu = "Select * From user where email = %s"
+    result = cursor.execute(sorgu,(session["email"],))
+    if result>0:
+        profil_data = cursor.fetchall()
+    return render_template("profil.html", profil_data = profil_data)
+
+@app.route("/UpdatePassword", methods = ["GET", "POST"])
+def UpdatePassword():
+    form = UpdatePasswordForm(request.form)
+    if request.method == 'POST':
+        yenisifre = form.yenisifre.data
+        tekrarsifre = form.tekrarsifre.data
+        eskisifre = form.eskisifre.data
+        cursor = myslq.connection.cursor()
+        sorgu = "Select * From user where email = %s"
+        result = cursor.execute(sorgu,(session["email"],))
+        if result>0:
+            data = cursor.fetchone()
+            password = data["Sifre"]
+
+        if yenisifre == tekrarsifre:
+            if sha256_crypt.verify(eskisifre, password):
+                sorgu = "UPDATE user SET Sifre = %s WHERE Email = %s"
+                result = cursor.execute(sorgu,(sha256_crypt.encrypt(yenisifre),session["email"]))
+                print(sha256_crypt.encrypt(yenisifre))
+                print(session["email"])
+                print(sorgu)
+                print(result)
+                if result>0:
+                     flash("Şifreniz başarıyla değiştirldi..","success")
+                else:
+                     flash("Şifre değişimi başarısız..","danger")
+            else:
+                flash("Mevcut şifrenizi yanlış girdiniz..","danger")
+        else:
+            flash("Yeni girdiğiniz şifre değerleri birbirinin aynı olmalıdır..","danger")
+    return render_template("UpdatePassword.html", form = form)
 
 
 @app.route("/")
